@@ -27,6 +27,14 @@ repositories {
     mavenCentral()
     maven { url 'https://packages.confluent.io/maven/' }
     maven { url 'https://jitpack.io' }
+
+    maven {
+      url 'https://maven.pkg.github.com/tigergraph/gsql_client'
+    credentials {
+      username = project.findProperty("gpr.user")
+      password = project.findProperty("gpr.key")
+    }
+  }
 }
 
 // spotbugs does not allow to generate a xml and html report at once https://github.com/spotbugs/spotbugs/issues/857
@@ -60,6 +68,11 @@ dependencies {
 
     implementation "org.apache.logging.log4j:log4j-api"
     implementation "org.apache.logging.log4j:log4j-core"
+
+    // Gsql client for tigergraph!
+    implementation ('com.tigergraph.client:gsql_client:3.1.2') {
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+    }
 
     testImplementation "org.apache.kafka:kafka-clients"
     
