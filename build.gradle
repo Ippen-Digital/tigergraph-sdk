@@ -1,0 +1,107 @@
+plugins {
+    // Project generation
+    // Apply the application plugin to add support for building an application
+    id 'org.springframework.boot' version '2.5.3'
+    id 'idea'
+    id 'java-library'
+
+    // spotbugs finds potential bugs in code
+    id 'com.github.spotbugs' version '4.7.2'
+
+    //spotless checks and applies format to file
+    //https://github.com/diffplug/spotless/tree/master/plugin-gradle
+    id 'com.diffplug.spotless' version '5.14.2'
+
+    // https://plugins.gradle.org/plugin/io.freefair.lombok
+    id "io.freefair.lombok" version "6.1.0"
+
+    id 'jacoco'
+
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+}
+
+group 'de.id.tigergraph.sdk'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://packages.confluent.io/maven/' }
+    maven { url 'https://jitpack.io' }
+}
+
+// spotbugs does not allow to generate a xml and html report at once https://github.com/spotbugs/spotbugs/issues/857
+tasks.matching { task -> task.name.startsWith('spotbugs') }.forEach {
+    it.excludeFilter = file('.spotbugs/exclude.xml')
+    it.reports {
+        html.enabled = true
+        xml.enabled = false    
+    }
+}
+
+configurations {
+    all*.exclude module : 'spring-boot-starter-logging'
+    all*.exclude module : 'android-json'
+}
+
+dependencyManagement {
+	imports {
+        mavenBom 'org.junit:junit-bom:5.7.2'
+	}
+}
+// https://docs.gradle.org/current/userguide/declaring_dependencies.html
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+   
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
+    implementation 'org.json:json:20210307'
+    implementation 'com.jayway.jsonpath:json-path:2.6.0'
+
+    implementation "org.apache.logging.log4j:log4j-api"
+    implementation "org.apache.logging.log4j:log4j-core"
+
+    testImplementation "org.apache.kafka:kafka-clients"
+    
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'    
+    }
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params'
+    testImplementation 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.junit.platform:junit-platform-runner'
+
+    testImplementation 'org.testcontainers:testcontainers:1.16.0'
+    testImplementation 'org.testcontainers:junit-jupiter:1.16.0'
+    testImplementation 'org.testcontainers:kafka:1.16.0'
+
+    testImplementation 'org.mock-server:mockserver-netty:5.11.2'
+    testImplementation 'org.mock-server:mockserver-client-java:5.11.2'
+}
+
+spotless {
+    java {
+        removeUnusedImports() // removes any unused imports
+        eclipse().configFile '.formatter/spotless.eclipseformat.xml'
+        target 'src/**/*.java'
+        encoding 'UTF-8'
+    }
+
+    lineEndings 'UNIX'
+}
+
+test {
+	useJUnitPlatform()
+	testLogging {
+		events "passed", "skipped", "failed"
+	}
+    finalizedBy jacocoTestReport // report is always generated after tests run
+}
+jacocoTestReport {
+    reports {
+        xml.required = true
+    }
+    dependsOn test // tests are required to run before generating the report
+}
