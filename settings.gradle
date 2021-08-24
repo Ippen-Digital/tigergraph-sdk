@@ -1,0 +1,21 @@
+/*
+ * add for custom plugins
+ *  https://docs.gradle.org/current/userguide/plugins.html#sec:plugin_markers
+ */
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+
+        mavenCentral()
+        google()
+        maven { url "https://plugins.gradle.org/m2/" }
+
+        maven {
+            name 'JCenter Gradle Plugins'
+            url  'https://dl.bintray.com/gradle/gradle-plugins'
+        }
+    }
+}
+
+rootProject.name = 'tigergraph-sdk'
+include('lib')
