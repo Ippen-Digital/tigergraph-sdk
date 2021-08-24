@@ -20,7 +20,7 @@ plugins {
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
-group 'de.id.tigergraph.sdk'
+group 'com.github.ippen-digital'
 version '1.0-SNAPSHOT'
 
 repositories {
